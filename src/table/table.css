@@ -1,0 +1,17 @@
+.table {
+  flex: 5;
+  height: 70vh;
+  background-color: rgb(236, 240, 243);
+  border: none;
+  width: 100%;
+}
+
+.tableButtons {
+  width: 7vh;
+  margin-left: 0.5vh;
+}
+
+.buttons {
+  margin: 2vh;
+  margin-top: 18px;
+}

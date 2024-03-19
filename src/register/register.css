@@ -1,0 +1,19 @@
+.error {
+  color: red;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.submitButton {
+  margin-top: 12px;
+  margin-right: 5vh;
+  margin-bottom: 3vh;
+}
+
+.input.errorBorder {
+  border: 1px solid red;
+}
+
+.resetButton {
+  margin-left: 20vh;
+}

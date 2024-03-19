@@ -21,3 +21,520 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Registeration in parent component
+ <div className="register">
+          <div className="inputs">
+            <h1 className="title">Registration Form</h1>
+            <form onSubmit={handleSubmit}>
+              <input
+                className="input"
+                type="text"
+                name="name"
+                onChange={handleChange}
+                placeholder="Name"
+              />
+              <input
+                className="input"
+                type="email"
+                name="email"
+                onChange={handleChange}
+                placeholder="Email"
+              />
+              <input
+                className="input"
+                type="number"
+                name="phone"
+                onChange={handleChange}
+                placeholder="Phone"
+              />
+              <input
+                className="input"
+                type="text"
+                name="address"
+                onChange={handleChange}
+                placeholder="Address"
+              />
+              <div className="button">
+                <button type="submit" className="submitButton">
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div> 
+
+# Registeration component function for update
+import "./register.css";
+import React, { useState, useEffect } from "react";
+
+function Register({ onSubmit, onEdit, editMode, editRowData }) {
+  const [formData, setFormData] = useState({
+    id: editRowData ? editRowData.id : "", // Set the ID initially to the provided editRowData ID
+    name: editRowData ? editRowData.name : "",
+    email: editRowData ? editRowData.email : "",
+    phone: editRowData ? editRowData.phone : "",
+    address: editRowData ? editRowData.address : "",
+  });
+
+  const [errors, setErrors] = useState({});
+  const [submitLabel, setSubmitLabel] = useState("");
+
+  useEffect(() => {
+    if (editMode) {
+      setSubmitLabel("Update");
+    } else {
+      setSubmitLabel("Submit");
+    }
+  }, [editMode]);
+
+  useEffect(() => {
+    // If editMode is true and editRowData is provided, populate the form with existing data
+    if (editMode && editRowData) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        ...editRowData,
+      }));
+    } else {
+      // Otherwise, reset the form data
+      setFormData({
+        id: "",
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+      });
+    }
+  }, [editMode, editRowData]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+
+    validateForm(name, value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const emptyFields = Object.entries(formData).reduce((acc, [key, value]) => {
+      if (value === "" && key !== "id") {
+        acc[key] = `${key.charAt(0).toUpperCase() + key.slice(1)} is required`;
+      }
+      return acc;
+    }, {});
+    setErrors(emptyFields);
+    if (Object.keys(emptyFields).length > 0) {
+      return;
+    }
+    if (editMode) {
+      onEdit(formData); // Call the onEdit function with the updated data
+    } else {
+      onSubmit(formData); // Call the onSubmit function with the new data
+    }
+    if (!editMode) {
+      setFormData({
+        id: "",
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+      });
+    }
+  };
+
+  const validateForm = (fieldName, value) => {
+    let error = "";
+    switch (fieldName) {
+      case "name":
+        if (!value) {
+          error = "Name is required";
+        } else if (!/^[a-zA-Z\s]+$/.test(value)) {
+          error = "Name must contain only alphabetic characters";
+        }
+        break;
+      case "email":
+        if (!value) {
+          error = "Email is required";
+        } else if (!/\S+@\S+\.\S+/.test(value)) {
+          error = "Email is invalid";
+        }
+        break;
+      case "phone":
+        if (!value) {
+          error = "Phone is required";
+        } else if (!/^03\d{9}$/.test(value)) {
+          error = "Phone number must start with 03 and should be 11 digits";
+        }
+        break;
+      case "address":
+        if (!value) {
+          error = "Address is required";
+        }
+        break;
+      default:
+        break;
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [fieldName]: error,
+    }));
+  };
+
+  return (
+    <div className="register">
+      <div className="inputs">
+        <h1 className="title">Registration Form</h1>
+        <form onSubmit={handleSubmit}>
+          <input
+            className={`input ${errors.name ? "errorBorder" : ""}`}
+            type="text"
+            name="name"
+            placeholder="Name"
+            value={formData.name}
+            onChange={handleChange}
+          />
+          {errors.name && <p className="error">{errors.name}</p>}
+          <input
+            className={`input ${errors.email ? "errorBorder" : ""}`}
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          {errors.email && <p className="error">{errors.email}</p>}
+          <input
+            className={`input ${errors.phone ? "errorBorder" : ""}`}
+            type="tel"
+            name="phone"
+            placeholder="Phone"
+            value={formData.phone}
+            onChange={handleChange}
+          />
+          {errors.phone && <p className="error">{errors.phone}</p>}
+          <input
+            className={`input ${errors.address ? "errorBorder" : ""}`}
+            type="text"
+            name="address"
+            placeholder="Address"
+            value={formData.address}
+            onChange={handleChange}
+          />
+          {errors.address && <p className="error">{errors.address}</p>}
+          <div className="button">
+            <button type="submit" className="submitButton">
+              {submitLabel}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default Register;
+
+
+# Table component more refined
+
+import "./table.css";
+import * as React from "react";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+
+export default function BasicTable({
+  rows,
+  onEditRow,
+  onDeleteRow,
+  editButtonName,
+  deleteButtonName,
+}) {
+  const [updatedRows, setUpdatedRows] = useState(rows);
+
+  useEffect(() => {
+    setUpdatedRows(rows);
+  }, [rows]);
+
+  function deleteRow(rowToDel) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, cancel!",
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const updatedRowsCopy = [...updatedRows];
+        const indexToDelete = updatedRowsCopy.findIndex((row) => row.id === rowToDel.id);
+        updatedRowsCopy.splice(indexToDelete, 1);
+        setUpdatedRows(updatedRowsCopy);
+        onDeleteRow(rowToDel);
+        Swal.fire("Deleted!", "Your data has been deleted.", "success");
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire("Cancelled", "Your data is safe :)", "error");
+      }
+    });
+  }
+
+  function editRow(rowToEdit) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, edit it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "You can now edit!",
+          icon: "success",
+        });
+        onEditRow(rowToEdit);
+      }
+    });
+  }
+
+  return (
+    <TableContainer
+      className="tableContainer"
+      style={{
+        backgroundColor: "rgb(236, 240, 243)",
+        boxShadow: "2px 4px 10px 1px rgba(201, 201, 201, 0.854)",
+      }}
+      component={Paper}
+    >
+      <Table className="table" sx={{ maxHeight: 200 }}>
+        <TableHead>
+          <TableRow>
+            <TableCell align="center">ID</TableCell>
+            <TableCell align="center">Name</TableCell>
+            <TableCell align="center">Email</TableCell>
+            <TableCell align="center">Phone</TableCell>
+            <TableCell align="center">Address</TableCell>
+            <TableCell className="action" align="center">
+              Actions
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {updatedRows.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell>{row.id}</TableCell>
+              <TableCell>{row.name}</TableCell>
+              <TableCell align="center">{row.email}</TableCell>
+              <TableCell align="center">{row.phone}</TableCell>
+              <TableCell align="center">{row.address}</TableCell>
+              <TableCell className="buttons" align="center">
+                <button className="tableButtons" onClick={() => editRow(row)}>
+                  {editButtonName || (row.actions && row.actions.edit)}
+                </button>
+                <button className="tableButtons" onClick={() => deleteRow(row)}>
+                  {deleteButtonName || (row.actions && row.actions.delete)}
+                </button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
+
+# Unique Id
+const isEmailUnique = !rows.some((row) => row.email === formData.email);
+  if (!isEmailUnique) {
+    Swal.fire("Error", "Email address must be unique", "error");
+    return;
+
+
+# Search bar 1
+import "./table.css";
+import * as React from "react";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import { styled, alpha } from "@mui/material/styles";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import InputBase from "@mui/material/InputBase";
+import SearchIcon from "@mui/icons-material/Search";
+
+export default function BasicTable({
+  rows,
+  onEditRow,
+  onDeleteRow,
+  editButtonName,
+  deleteButtonName,
+}) {
+  const [updatedRows, setUpdatedRows] = useState(rows);
+ 
+  const [search, setSearch] = useState("");
+  console.log(search);
+  useEffect(() => {
+    setUpdatedRows(rows);
+  }, [rows]);
+
+  function deleteRow(rowToDel) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, cancel!",
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const updateRows = updatedRows.filter((row) => row.id !== rowToDel.id);
+        setUpdatedRows(updateRows);
+        onDeleteRow(rowToDel);
+        Swal.fire("Deleted!", "Your data has been deleted.", "success");
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire("Cancelled", "Your data is safe :)", "error");
+      }
+    });
+  }
+  
+
+  function editRow(rowToEdit) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, edit it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        onEditRow(rowToEdit);
+      }
+    });
+  }
+
+  const Search = styled("div")(({ theme }) => ({
+    position: "relative",
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: alpha(theme.palette.common.white, 0.15),
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.common.white, 0.25),
+    },
+    marginLeft: 0,
+    width: "100%",
+    [theme.breakpoints.up("sm")]: {
+      marginLeft: theme.spacing(1),
+      width: "auto",
+    },
+  }));
+
+  const SearchIconWrapper = styled("div")(({ theme }) => ({
+    padding: theme.spacing(0, 2),
+    height: "100%",
+    position: "absolute",
+    pointerEvents: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }));
+
+  const StyledInputBase = styled(InputBase)(({ theme }) => ({
+    color: "inherit",
+    width: "100%",
+    "& .MuiInputBase-input": {
+      padding: theme.spacing(1, 1, 1, 0),
+      paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+      transition: theme.transitions.create("width"),
+      [theme.breakpoints.up("sm")]: {
+        width: "12ch",
+        "&:focus": {
+          width: "20ch",
+        },
+      },
+    },
+  }));
+
+  return (
+    <TableContainer
+      className="tableContainer"
+      style={{
+        backgroundColor: "rgb(236, 240, 243)",
+        boxShadow: "2px 4px 10px 1px rgba(201, 201, 201, 0.854)",
+      }}
+      component={Paper}
+    >
+      <div className="searchBar">
+        <Box sx={{ flexGrow: 1 }}>
+          <AppBar position="static">
+            <Toolbar>
+              <Search>
+                <SearchIconWrapper>
+                  <SearchIcon />
+                </SearchIconWrapper>
+                <StyledInputBase
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search…"
+                  inputProps={{ "aria-label": "search" }}
+                />
+              </Search>
+            </Toolbar>
+          </AppBar>
+        </Box>
+      </div>
+      <Table className="table" sx={{ maxHeight: 200 }}>
+        <TableHead>
+          <TableRow>
+            <TableCell align="center">ID</TableCell>
+            <TableCell align="center">Name</TableCell>
+            <TableCell align="center">Email</TableCell>
+            <TableCell align="center">Phone</TableCell>
+            <TableCell align="center">Address</TableCell>
+            <TableCell className="action" align="center">
+              Actions
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {updatedRows.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell align="center">{row.id}</TableCell>
+              <TableCell align="center">{row.name}</TableCell>
+              <TableCell align="center">{row.email}</TableCell>
+              <TableCell align="center">{row.phone}</TableCell>
+              <TableCell align="center">{row.address}</TableCell>
+              <TableCell className="buttons" align="center">
+                <button className="tableButtons" onClick={() => editRow(row)}>
+                  {editButtonName || (row.actions && row.actions.edit)}
+                </button>
+                <button className="tableButtons" onClick={() => deleteRow(row)}>
+                  {deleteButtonName || (row.actions && row.actions.delete)}
+                </button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
